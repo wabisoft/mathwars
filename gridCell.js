@@ -30,7 +30,7 @@ gridCell.prototype.arithmetic = function(previousGridCell)
   // this cell is the last selected one
   // check cases, only allow if they have opposite signs
   // operation should always be addition
-  if(this.num>0 && previousGridCell.num < 0)
+  if(this.num >= 0 && previousGridCell.num <= 0)
   {
     this.num += previousGridCell.num;
     this.numString = this.num.toString();
@@ -40,7 +40,7 @@ gridCell.prototype.arithmetic = function(previousGridCell)
     previousGridCell.numString = previousGridCell.num.toString();
   }
 
-  else if (this.num < 0 && previousGridCell.num > 0)
+  else if (this.num <= 0 && previousGridCell.num >= 0)
   {
     this.num += previousGridCell.num;
     this.numString = this.num.toString();
@@ -49,7 +49,6 @@ gridCell.prototype.arithmetic = function(previousGridCell)
     previousGridCell.num -= 1;
     previousGridCell.numString = previousGridCell.num.toString();
   }
-
 }
 
 gridCell.prototype.display = function()
