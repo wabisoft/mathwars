@@ -4,7 +4,10 @@ const WHITE = "#d2d2d2";
 const GREY = "#787878";
 const GREEN = "#26ff00";
 const RED = "#ff0000";
-
+const BLOCK_SIZE = MathWars.BLOCK_SIZE;
+const BLOCK_CENTER = MathWars.BLOCK_CENTER;
+const BOARD_ROWS = MathWars.BOARD_ROWS;
+const BOARD_COLUMNS = MathWars.BOARD_COLUMNS;
 const FONT_SIZE = 30;
 const Color = new Map([[1, WHITE], [-1, BLACK], [0, GREY]]);
 Object.freeze(Color);
@@ -20,14 +23,6 @@ const outline = { color: PITCH_BLACK, weight: 2 };
 Object.freeze(outline);
 
 var FONT;
-
-function preload() {
-  FONT = loadFont("AvenirNextLTPro-Demi.otf");
-}
-
-function setup() {
-  createCanvas(BLOCK_SIZE * BOARD_ROWS, BLOCK_SIZE * BOARD_ROWS);
-}
 
 function draw_rect(rectangle, lineColor, lineWeight, fillColor = null) {
   noFill();
@@ -88,6 +83,7 @@ function draw_board(board) {
 function draw_selection(selection) {
   draw_rect(selection.block.rect, GREEN, 2);
 }
+
 function draw_game(game) {
   clear();
   draw_board(game.board);

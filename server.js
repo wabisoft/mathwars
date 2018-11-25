@@ -1,11 +1,8 @@
 const Express = require("express");
 const SocketIO = require("socket.io");
 const Http = require("http");
-const STATIC = Express.static("public");
-
-var Game = require("./src/game.js");
-var Board = require("./src/board.js");
-var Block = require("./src/board.js");
+const STATIC = Express.static("dist");
+const Game = require("./dist/mathwars.js").Game;
 
 var app = Express();
 var server = Http.Server(app);

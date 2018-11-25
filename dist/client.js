@@ -1,9 +1,9 @@
 class Client {
   constructor() {
-    this.socket = io(SERVER_ADDR);
-    this.game = new Game();
+    this.socket = io(MathWars.SERVER_ADDR);
+    this.game = new MathWars.Game();
     this.socket.on("mousePressed", this.mousePressed.bind(this));
-    // this.socket.on("playerJoined", this.playerJoined.bind(this));
+    this.socket.on("playerJoined", this.playerJoined.bind(this));
   }
 
   playerJoined(clientId) {
@@ -22,6 +22,16 @@ class Client {
 }
 
 var client = new Client();
+// console.log(client.game);
+// console.log(client.game.board.getBlockAtIndex({ x: 0, y: 0 }).num);
+
+function preload() {
+  FONT = loadFont("AvenirNextLTPro-Demi.otf");
+}
+
+function setup() {
+  createCanvas(BLOCK_SIZE * BOARD_ROWS, BLOCK_SIZE * BOARD_COLUMNS);
+}
 
 // Draw is the hook for p5's event loop
 function draw() {

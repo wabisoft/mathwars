@@ -1,154 +1,141 @@
-var socket;
-//
-var myTurn = true;
-//
-var board;
+(function(exports) {
+  const SERVER_HOST = "tomato.local";
+  const SERVER_PORT = "3000";
+  const MAX_VALUE = 20;
+  const BOARD_ROWS = 7;
+  const BOARD_COLUMNS = 7;
+  const SERVER_ADDR = SERVER_HOST + ":" + SERVER_PORT;
+  const BLOCK_SIZE = 80;
+  const BLOCK_CENTER = BLOCK_SIZE / 2;
+  exports.SERVER_ADDR = SERVER_ADDR;
+  exports.BLOCK_SIZE = BLOCK_SIZE;
+  exports.BLOCK_CENTER = BLOCK_CENTER;
+  exports.BOARD_ROWS = BOARD_ROWS;
+  exports.BOARD_COLUMNS = BOARD_COLUMNS;
 
-var selection;
-// right now, since I'm overwriting the grid from the board made server side
-// there is no reason to make number grid at construction
-function makeGrids() {
-  this.grid = make2DArray(this.rows, this.columns);
-  this.numberGrid = make2DArray(this.rows, this.columns);
+  function Matrix(rows, columns) {
+    return new Array(rows).fill(null).map(function() {
+      return new Array(columns);
+    });
+  }
 
-  for (var i = 0; i < this.rows; i++) {
-    for (var j = 0; j < this.columns; j++) {
-      let number = getNumber();
-      this.grid[i][j] = new gridCell(
-        this.squareSize,
-        i,
-        j,
-        number,
-        this.font,
-        this.fontSize
-      );
-      this.numberGrid[i][j] = this.grid[i][j].num;
+  function my_random(lower = 0, upper = MAX_VALUE, signed = true) {
+    var num = Math.floor(Math.random() * (upper - lower + 1)) + lower;
+    return Math.random() > 0.5 && signed ? num * -1 : num;
+  }
+
+  class Block {
+    constructor(index, num) {
+      this.index = index;
+      this.pos = { x: index.x * BLOCK_SIZE, y: index.y * BLOCK_SIZE };
+      this.num = num;
+    }
+
+    get rect() {
+      return {
+        x: this.pos.x,
+        y: this.pos.y,
+        w: BLOCK_SIZE,
+        h: BLOCK_SIZE
+      };
     }
   }
-}
 
-// mouse click handling stuff
-var thisClickI = 0;
-var thisClickJ = 0;
-var lastClickI = 0;
-var lastClickJ = 0;
-var clickCount = 0;
+  class Board {
+    constructor(rows = BOARD_ROWS, columns = BOARD_COLUMNS) {
+      this.rows = rows;
+      this.columns = columns;
+      this._matrix = Matrix(this.rows, this.columns);
+      for (let i = 0; i < this.rows; i++) {
+        for (let j = 0; j < this.columns; j++) {
+          this._matrix[i][j] = new Block({ x: i, y: j }, my_random());
+        }
+      }
+    }
 
-function setup() {
-  board = new Board();
-  createCanvas(board.squareSize * board.rows, board.squareSize * board.columns);
-  console.log(io);
-  socket = io.connect("http://tomato.local:3000/");
-  socket.on("initMessage", getGrid);
-  socket.on("turn", newDraw);
-  socket.on("makeSelection", makeSelection);
-}
+    getBlockAtPos(pos) {
+      let index = {
+        x: Math.floor(pos.x / BLOCK_SIZE),
+        y: Math.floor(pos.y / BLOCK_SIZE)
+      };
+      if (
+        index.x < this.rows &&
+        index.x >= 0 &&
+        index.y < this.columns ** index.y >= 0
+      ) {
+        return this._matrix[index.x][index.y];
+      }
+      return null;
+    }
 
-function makeSelection(selectionData, playerId) {}
+    getBlockAtIndex(index) {
+      if (index.x < this.rows && index.y < this.columns) {
+        return this._matrix[index.x][index.y];
+      }
+      return null;
+    }
 
-function getGrid(initData) {
-  // console.log("received");
-  for (var i = 0; i < board.rows; i++) {
-    for (var j = 0; j < board.columns; j++) {
-      // set global board to
-      board.grid[i][j].num = initData.g[i][j];
-      board.grid[i][j].numString = board.grid[i][j].num.toString();
+    get numMatrix() {
+      var retMatrix = Matrix(this.rows, this.columns);
+      for (let i = 0; i < this.rows; i++) {
+        for (let j = 0; j < this.columns; j++) {
+          retMatrix[i][j] = this._matrix[i][j];
+        }
+      }
+      return retMatrix;
     }
   }
-  // set the number array (the data structure we use with server) to be
-  // the same as the change board grid of cells.
-  board.setNumberGrid();
-}
 
-function newDraw(data) {
-  myTurn = data.x;
-
-  for (var i = 0; i < board.rows; i++) {
-    for (var j = 0; j < board.columns; j++) {
-      // set global board to
-      board.grid[i][j].num = data.y[i][j];
-      board.grid[i][j].numString = board.grid[i][j].num.toString();
+  class Player {
+    constructor(id) {
+      this.id = id;
+      this.canMove = false;
+      this.color = null;
     }
   }
-  // set the number array (the data structure we use with server) to be
-  // the same as the change board grid of cells.
-  board.setNumberGrid();
-}
 
-function draw() {
-  background(51);
-  let lastDrawIndexI = 0;
-  let lastDrawIndexJ = 0;
+  class Selection {
+    constructor(block) {
+      this.block = block;
+    }
+  }
 
-  for (var i = 0; i < board.rows; i++) {
-    for (var j = 0; j < board.columns; j++) {
-      board.grid[i][j].display();
-      if (board.grid[i][j].isSelected == true) {
-        lastDrawIndexI = i;
-        lastDrawIndexJ = j;
+  class Game {
+    constructor() {
+      this.players = new Map();
+      this.board = new Board();
+      this.selection = null;
+    }
+
+    registerPlayer(playerId) {
+      if (this.players.size == 2) {
+        return false;
+      }
+      this.players.set(playerId, new Player(playerId));
+      console.log("Registered new player with id " + playerId);
+      return true;
+    }
+
+    start() {
+      startPlayer = this.players.values()[0];
+      startPlayer.canMove = True;
+      this.playersList[0].canMove = true;
+    }
+
+    preload() {}
+
+    mousePressed(mouse) {
+      let block = this.board.getBlockAtPos(mouse);
+      if (!block) {
+        return;
+      }
+      if (!this.selection) {
+        this.selection = new Selection(block);
+      } else if (block.index == this.selection.block.index) {
+        delete this.selection;
+      } else if (block.color == this.selection.block.color) {
       }
     }
   }
-  board.grid[lastDrawIndexI][lastDrawIndexJ].display();
-}
-
-function mousePressed() {
-  console.log("This is the grid array:   ");
-  console.log(board.grid);
-  console.log("This is the number array:   ");
-  console.log(board.numberGrid);
-  data = { x: mouseX, y: mouseY };
-  socket.emit("mousePressed", data);
-  // if (myTurn == true) {
-  //   // swap to turn off for draw call
-  //   if (clickCount == 1) {
-  //     lastClickI = thisClickI;
-  //     lastClickJ = thisClickJ;
-  //     board.grid[lastClickI][lastClickJ].isSelected = false;
-  //   }
-
-  //   for (var i = 0; i < board.rows; i++) {
-  //     for (var j = 0; j < board.columns; j++) {
-  //       if (board.grid[i][j].selection(mouseX, mouseY)) {
-  //         thisClickI = i;
-  //         thisClickJ = j;
-  //         if (clickCount == 0) {
-  //           if (board.grid[i][j].num != 0) {
-  //             clickCount += 1;
-  //             board.grid[thisClickI][thisClickJ].isSelected = true;
-  //           }
-  //         }
-  //         // do arithmetic
-  //         else if (clickCount == 1) {
-  //           // I think the bounds of the array can be ignored if i just check each
-  //           // of the four cases
-  //           if (
-  //             (thisClickI + 1 == lastClickI && thisClickJ == lastClickJ) ||
-  //             (thisClickI == lastClickI && thisClickJ + 1 == lastClickJ) ||
-  //             (thisClickI == lastClickI && thisClickJ - 1 == lastClickJ) ||
-  //             (thisClickI - 1 == lastClickI && thisClickJ == lastClickJ)
-  //           ) {
-  //             board.grid[thisClickI][thisClickJ].arithmetic(
-  //               board.grid[lastClickI][lastClickJ]
-  //             );
-  //             // this can only be reached if a turn has been made
-  //             myTurn = false;
-  //           }
-  //           clickCount += 1;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   // reset click count every two clicks
-  //   if (clickCount == 2) {
-  //     clickCount = 0;
-  //   }
-  // }
-
-  // board.setNumberGrid();
-
-  // if (myTurn == false) {
-  //   var data = { x: true, y: board.numberGrid };
-  //   socketemit("turn", data);
-  // }
-}
+  exports.Game = Game;
+})(typeof exports === "undefined" ? (this["MathWars"] = {}) : exports);
