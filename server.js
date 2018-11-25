@@ -1,68 +1,29 @@
-const Player = require("./public/player.js");
+const Express = require("express");
+const SocketIO = require("socket.io");
+const Http = require("http");
+const STATIC = Express.static("public");
 
-// Setting up number grid
-numberGrid = make2DArray(7, 7);
-var players = {};
+var Game = require("./src/game.js");
+var Board = require("./src/board.js");
+var Block = require("./src/board.js");
 
-for (var i = 0; i < numberGrid.length; i++) {
-  for (var j = 0; j < numberGrid.length; j++) {
-    numberGrid[i][j] = getRandIntNumber();
-  }
-}
+var app = Express();
+var server = Http.Server(app);
+var io = SocketIO(server);
+var game = new Game();
+app.use(STATIC);
 
-function make2DArray(rows, columns) {
-  // of size rows
-  var arr = new Array(rows);
+server.listen(3000, "0.0.0.0");
 
-  for (var i = 0; i < arr.length; i++) {
-    // of size columns
-    arr[i] = new Array(columns);
-  }
-  return arr;
-}
+clients = new Map();
+io.on("connection", registerSocket);
 
-function getRandIntNumber() {
-  var num = Math.floor((Math.random() + 0.1) * 10);
-  var num2 = Math.random();
-  if (num2 > 0.5) {
-    num *= -1;
-  }
-  return num;
-}
-
-// SERVER STUFF
-var express = require("express");
-var app = express();
-var server = app.listen(3000, "0.0.0.0");
-app.use(express.static("public"));
-//
-console.log("running");
-//
-var socket = require("socket.io");
-var io = socket(server);
-io.sockets.on("connection", newConnection);
-
-function newConnection(socket) {
-  console.log("new connection with id: " + socket.id);
-  players[socket.id] = new Player(socket.id);
-  var initData = { g: numberGrid, players: players };
-
-  // broadcast to all connected sockets to reset grid
-  // should also broadcast init turn
-  io.sockets.emit("initMessage", initData);
-
-  //
-  socket.on("turn", turnMsg);
-  socket.on("mousePressed", mousePressed);
-  function turnMsg(data) {
-    // numberGrid = data.y;
-    console.log("recieved turn data and sending array:  ");
-    console.log(data.y);
-    socket.broadcast.emit("turn", data);
-  }
-
-  function mousePressed(data) {
-    console.log(data);
-    console.log(socket.id);
-  }
+function registerSocket(socket) {
+  clients.set(socket.id, socket);
+  socket.on("mousePressed", function mousePressed(mouse) {
+    console.log("Received mousePressed from " + socket.id);
+    io.emit("mousePressed", socket.id, mouse);
+  });
+  console.log("Registered new client with id " + socket.id);
+  io.emit("playerJoined", socket.id);
 }
