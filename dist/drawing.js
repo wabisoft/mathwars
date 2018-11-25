@@ -47,14 +47,12 @@ function draw_string(string, pos, lineColor, lineWeight, fillColor = null) {
   } else {
     noFill();
   }
-  text(string, pos.x + FONT_SIZE / 2, pos.y + FONT_SIZE / 2);
+  text(string, pos.x + FONT_SIZE / 4, pos.y + FONT_SIZE / 4);
   noFill();
 }
 
 function blockColor(block) {
-  return Color.get(
-    block.num == 0 ? block.num : block.num / Math.abs(block.num)
-  );
+  return Color.get(block.sign);
 }
 
 function complimentaryBlockColor(block) {

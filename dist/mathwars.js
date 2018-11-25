@@ -31,6 +31,10 @@
       this.num = num;
     }
 
+    get sign() {
+      return this.num == 0 ? this.num : this.num / Math.abs(this.num);
+    }
+
     get rect() {
       return {
         x: this.pos.x,
@@ -42,13 +46,15 @@
   }
 
   class Board {
-    constructor(rows = BOARD_ROWS, columns = BOARD_COLUMNS) {
+    constructor(rows = BOARD_ROWS, columns = BOARD_COLUMNS, matrix = null) {
       this.rows = rows;
       this.columns = columns;
       this._matrix = Matrix(this.rows, this.columns);
       for (let i = 0; i < this.rows; i++) {
         for (let j = 0; j < this.columns; j++) {
-          this._matrix[i][j] = new Block({ x: i, y: j }, my_random());
+          let blockIndex = matrix ? matrix[i][j].index : { x: i, y: j };
+          let blockNum = matrix ? matrix[i][j].num : my_random();
+          this._matrix[i][j] = new Block(blockIndex, blockNum);
         }
       }
     }
@@ -87,10 +93,10 @@
   }
 
   class Player {
-    constructor(id) {
+    constructor(id, canMove = false, sign = null) {
       this.id = id;
-      this.canMove = false;
-      this.color = null;
+      this.canMove = canMove;
+      this.sign = sign;
     }
   }
 
@@ -101,19 +107,47 @@
   }
 
   class Game {
-    constructor() {
-      this.players = new Map();
-      this.board = new Board();
-      this.selection = null;
+    constructor(gameData = null) {
+      if (gameData) {
+        let boardData = gameData.board;
+        this.board = new Board(
+          boardData.rows,
+          boardData.columns,
+          boardData._matrix
+        );
+        this.players = {};
+        for (let playerId in gameData.players) {
+          let playerData = gameData.players[playerId];
+          this.players[playerId] = new Player(
+            playerId,
+            playerData.canMove,
+            playerData.sign
+          );
+        }
+        if (gameData.selection) {
+          let blockData = gameData.selection.block;
+          let block = this.board.getBlockAtIndex(blockData.index);
+          this.selection = new Selection(block);
+        }
+      } else {
+        this.board = new Board();
+        this.players = {};
+        this.selection = null;
+      }
     }
 
     registerPlayer(playerId) {
-      if (this.players.size == 2) {
+      if (Object.keys(this.players).length >= 2) {
         return false;
       }
-      this.players.set(playerId, new Player(playerId));
-      console.log("Registered new player with id " + playerId);
+      this.players[playerId] = new Player(playerId);
+      console.log(playerId + " connected!");
       return true;
+    }
+
+    unregisterPlayer(playerId) {
+      delete this.players[playerId];
+      console.log(playerId + " disconnected!");
     }
 
     start() {
@@ -133,7 +167,10 @@
         this.selection = new Selection(block);
       } else if (block.index == this.selection.block.index) {
         delete this.selection;
-      } else if (block.color == this.selection.block.color) {
+      } else {
+        // TODO: check that block is within range of selection
+        block.num += this.selection.block.num;
+        delete this.selection;
       }
     }
   }
