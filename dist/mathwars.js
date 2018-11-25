@@ -13,6 +13,23 @@
   exports.BOARD_ROWS = BOARD_ROWS;
   exports.BOARD_COLUMNS = BOARD_COLUMNS;
 
+  const MOVE_VECTORS = [
+    { x: 0, y: 1 },
+    { x: 1, y: 0 },
+    { x: -1, y: 0 },
+    { x: 0, y: -1 }
+  ];
+
+  function isValidMove(move) {
+    let res = false;
+    MOVE_VECTORS.forEach(function(vector) {
+      if (move.x === vector.x && move.y === vector.y) {
+        res = true;
+      }
+    });
+    return res;
+  }
+
   function Matrix(rows, columns) {
     return new Array(rows).fill(null).map(function() {
       return new Array(columns);
@@ -23,6 +40,10 @@
     var num = Math.floor(Math.random() * (upper - lower + 1)) + lower;
     return Math.random() > 0.5 && signed ? num * -1 : num;
   }
+  function signof(num) {
+    // return num == 0 ? num : num / Math.abs(num);
+    return Math.sign(num); // Oh look there's a stdlib function
+  }
 
   class Block {
     constructor(index, num) {
@@ -32,7 +53,7 @@
     }
 
     get sign() {
-      return this.num == 0 ? this.num : this.num / Math.abs(this.num);
+      return signof(this.num);
     }
 
     get rect() {
@@ -42,6 +63,35 @@
         w: BLOCK_SIZE,
         h: BLOCK_SIZE
       };
+    }
+
+    moveOn(other) {
+      let move = {
+        x: this.index.x - other.index.x,
+        y: this.index.y - other.index.y
+      };
+      if (isValidMove(move)) {
+        if (this.sign == other.sign) {
+          return this.reenforce(other);
+        } else {
+          return this.attack(other);
+        }
+      }
+      return false;
+    }
+
+    attack(other) {
+      other.num += this.num;
+      return true;
+    }
+    reenforce(other) {
+      let absNum = Math.abs(this.num);
+      if (!(absNum > 10)) {
+        return false;
+      }
+      other.num += 10 * this.sign;
+      this.num = (absNum - 10) * this.sign;
+      return true;
     }
   }
 
@@ -93,10 +143,11 @@
   }
 
   class Player {
-    constructor(id, canMove = false, sign = null) {
+    constructor(id, canMove = false, sign = 0) {
       this.id = id;
       this.canMove = canMove;
       this.sign = sign;
+      this.phase = "WAIT";
     }
   }
 
@@ -178,25 +229,36 @@
         return;
       }
       if (!this.selection) {
-        this.selection = new Selection(block);
-      } else if (block.index == this.selection.block.index) {
+        if (player.sign == 0 || player.sign == block.sign) {
+          this.selection = new Selection(block);
+        }
+        return;
+      } else if (block == this.selection.block) {
         delete this.selection;
-      } else {
-        // TODO: check that block is within range of selection
-        block.num += this.selection.block.num;
-        delete this.selection;
+        return;
+      }
+      if (this.selection.block.moveOn(block)) {
         this.endTurn(player);
       }
     }
 
-    endTurn(player) {
+    getOtherPlayer(player) {
       let otherPlayers = Object.keys(this.players).filter(
         id => id !== player.id
       );
       let otherPlayerKey = otherPlayers[0];
-      let otherPlayer = this.players[otherPlayerKey];
+      return this.players[otherPlayerKey];
+    }
+
+    endTurn(player) {
+      let otherPlayer = this.getOtherPlayer(player);
       player.canMove = false;
       otherPlayer.canMove = true;
+      if (!player.sign) {
+        player.sign = this.selection.block.sign;
+        otherPlayer.sign = -player.sign;
+      }
+      delete this.selection;
     }
   }
   exports.Game = Game;

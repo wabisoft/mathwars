@@ -1,12 +1,9 @@
-var my_turn = false;
+var my_turn = false; // this is hacky and bad but I'm in a hurry here
 
 class Client {
   constructor() {
     this.socket = io(MathWars.SERVER_ADDR);
     this.socket.on("update", this.update.bind(this));
-    // this.socket.on("mousePressed", this.mousePressed.bind(this));
-    // this.socket.on("playerJoined", this.playerJoined.bind(this));
-    // this.socket.on("updatePlayers", this.updatePlayers.bind(this));
     this.socket.on("no", this.disconnect.bind(this));
     this.game = null;
   }
@@ -19,28 +16,8 @@ class Client {
   disconnect() {
     delete this.game;
   }
-
-  // updatePlayers(players) {
-  //   console.log(players);
-  // }
-
-  // playerJoined(clientId) {
-  //   if (clientId == this.socket.id) {
-  //     return;
-  //   }
-  //   this.game.registerPlayer(clientId);
-  // }
-
-  // mousePressed(clientId, mouse) {
-  //   console.log("Received mousePressed from server");
-  //   // if (clientId == this.socket.id) {
-  //   this.game.mousePressed(mouse);
-  //   // }
-  // }
 }
 var client = new Client();
-// console.log(client.game);
-// console.log(client.game.board.getBlockAtIndex({ x: 0, y: 0 }).num);
 
 function preload() {
   FONT = loadFont("AvenirNextLTPro-Demi.otf");
