@@ -1,3 +1,5 @@
+var my_turn = false;
+
 class Client {
   constructor() {
     this.socket = io(MathWars.SERVER_ADDR);
@@ -11,6 +13,7 @@ class Client {
 
   update(gameJSON) {
     this.game = new MathWars.Game(JSON.parse(gameJSON));
+    my_turn = this.game.players[this.socket.id].canMove;
   }
 
   disconnect() {
@@ -35,7 +38,6 @@ class Client {
   //   // }
   // }
 }
-
 var client = new Client();
 // console.log(client.game);
 // console.log(client.game.board.getBlockAtIndex({ x: 0, y: 0 }).num);

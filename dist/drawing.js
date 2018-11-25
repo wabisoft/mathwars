@@ -4,6 +4,7 @@ const WHITE = "#d2d2d2";
 const GREY = "#787878";
 const GREEN = "#26ff00";
 const RED = "#ff0000";
+const PURPLE = "#cc00ff";
 const BLOCK_SIZE = MathWars.BLOCK_SIZE;
 const BLOCK_CENTER = MathWars.BLOCK_CENTER;
 const BOARD_ROWS = MathWars.BOARD_ROWS;
@@ -79,7 +80,8 @@ function draw_board(board) {
 }
 
 function draw_selection(selection) {
-  draw_rect(selection.block.rect, GREEN, 2);
+  let selectionColor = my_turn ? GREEN : PURPLE;
+  draw_rect(selection.block.rect, selectionColor, 2);
 }
 
 function draw_game(game) {

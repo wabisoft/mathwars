@@ -23,7 +23,7 @@ function registerSocket(socket) {
   // console.log(game.players);
   update(game);
   socket.on("mousePressed", function mousePressed(mouse) {
-    game.mousePressed(mouse);
+    game.mousePressed(mouse, socket.id);
     console.log("Received mousePressed from " + socket.id);
     update(game);
   });
@@ -34,7 +34,6 @@ function registerSocket(socket) {
 }
 
 function update(game, socket) {
-  console.log(game.players);
   if (socket) {
     socket.emit("update", JSON.stringify(game));
   } else {

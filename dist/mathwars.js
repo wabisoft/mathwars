@@ -141,6 +141,16 @@
         return false;
       }
       this.players[playerId] = new Player(playerId);
+      let playerKeys = Object.keys(this.players);
+      if (playerKeys.length >= 2) {
+        // Thanks SO
+        // https://stackoverflow.com/a/15106541
+        let player = this.players[
+          playerKeys[(playerKeys.length * Math.random()) << 0]
+        ];
+        player.canMove = true;
+        console.log("It's " + player.id + " 's turn");
+      }
       console.log(playerId + " connected!");
       return true;
     }
@@ -158,7 +168,11 @@
 
     preload() {}
 
-    mousePressed(mouse) {
+    mousePressed(mouse, playerId) {
+      let player = this.players[playerId];
+      if (!player || !player.canMove) {
+        return;
+      }
       let block = this.board.getBlockAtPos(mouse);
       if (!block) {
         return;
@@ -171,7 +185,18 @@
         // TODO: check that block is within range of selection
         block.num += this.selection.block.num;
         delete this.selection;
+        this.endTurn(player);
       }
+    }
+
+    endTurn(player) {
+      let otherPlayers = Object.keys(this.players).filter(
+        id => id !== player.id
+      );
+      let otherPlayerKey = otherPlayers[0];
+      let otherPlayer = this.players[otherPlayerKey];
+      player.canMove = false;
+      otherPlayer.canMove = true;
     }
   }
   exports.Game = Game;
