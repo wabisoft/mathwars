@@ -12,6 +12,8 @@ const BOARD_COLUMNS = MathWars.BOARD_COLUMNS;
 const FONT_SIZE = 30;
 const Color = new Map([[1, WHITE], [-1, BLACK], [0, GREY]]);
 Object.freeze(Color);
+var boardBuffer;
+var uiBuffer;
 
 const ComplimentaryColor = new Map([
   [WHITE, BLACK],
@@ -24,6 +26,14 @@ const outline = { color: PITCH_BLACK, weight: 2 };
 Object.freeze(outline);
 
 var FONT;
+
+function setup() {
+  // boardBuffer = createGraphics(
+  //   BLOCK_SIZE * BOARD_ROWS,
+  //   BLOCK_SIZE * BOARD_COLUMNS
+  // );
+  createCanvas(BLOCK_SIZE * BOARD_ROWS, BLOCK_SIZE * BOARD_COLUMNS);
+}
 
 function draw_rect(rectangle, lineColor, lineWeight, fillColor = null) {
   noFill();

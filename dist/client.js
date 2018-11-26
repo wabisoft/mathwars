@@ -23,10 +23,6 @@ function preload() {
   FONT = loadFont("AvenirNextLTPro-Demi.otf");
 }
 
-function setup() {
-  createCanvas(BLOCK_SIZE * BOARD_ROWS, BLOCK_SIZE * BOARD_COLUMNS);
-}
-
 // Draw is the hook for p5's event loop
 function draw() {
   draw_game(client.game);
