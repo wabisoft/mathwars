@@ -26,11 +26,12 @@ function preload() {
 // Draw is the hook for p5's event loop
 function draw() {
   draw_game(client.game);
+  image(boardBuffer, 100, 100);
 }
 
 // mousePressed is the hook for p5's mouse press event callback
 function mousePressed() {
-  let mouse = { x: mouseX, y: mouseY };
+  let mouse = { x: mouseX - 100, y: mouseY - 100 };
   console.log("Sending click to server");
   client.socket.emit("mousePressed", mouse);
 }

@@ -3,8 +3,10 @@ const BLACK = "#333333";
 const WHITE = "#d2d2d2";
 const GREY = "#787878";
 const GREEN = "#26ff00";
+const DARK_GREEN = "#083300";
 const RED = "#ff0000";
 const PURPLE = "#cc00ff";
+const DARK_PURPLE = "#290033";
 const BLOCK_SIZE = MathWars.BLOCK_SIZE;
 const BLOCK_CENTER = MathWars.BLOCK_CENTER;
 const BOARD_ROWS = MathWars.BOARD_ROWS;
@@ -28,38 +30,46 @@ Object.freeze(outline);
 var FONT;
 
 function setup() {
-  // boardBuffer = createGraphics(
-  //   BLOCK_SIZE * BOARD_ROWS,
-  //   BLOCK_SIZE * BOARD_COLUMNS
-  // );
-  createCanvas(BLOCK_SIZE * BOARD_ROWS, BLOCK_SIZE * BOARD_COLUMNS);
+  createCanvas(BLOCK_SIZE * BOARD_ROWS + 200, BLOCK_SIZE * BOARD_COLUMNS + 200);
+  boardBuffer = createGraphics(
+    BLOCK_SIZE * BOARD_ROWS,
+    BLOCK_SIZE * BOARD_COLUMNS
+  );
+  // createCanvas(BLOCK_SIZE * BOARD_ROWS, BLOCK_SIZE * BOARD_COLUMNS);
 }
 
 function draw_rect(rectangle, lineColor, lineWeight, fillColor = null) {
-  noFill();
-  stroke(lineColor);
-  strokeWeight(lineWeight);
+  boardBuffer.noFill();
+  boardBuffer.stroke(lineColor);
+  boardBuffer.strokeWeight(lineWeight);
   if (fillColor) {
-    fill(fillColor);
+    boardBuffer.fill(fillColor);
   }
-  rect(rectangle.x, rectangle.y, rectangle.w, rectangle.h);
-  noFill();
+  boardBuffer.rect(rectangle.x, rectangle.y, rectangle.w, rectangle.h);
+  boardBuffer.noFill();
 }
 
-function draw_string(string, pos, lineColor, lineWeight, fillColor = null) {
-  noFill();
-  stroke(lineColor);
-  strokeWeight(lineWeight);
-  textFont(FONT);
-  textSize(FONT_SIZE);
-  textAlign(CENTER, CENTER);
+function draw_string(
+  string,
+  pos,
+  lineColor,
+  lineWeight,
+  fillColor = null,
+  fontSize = FONT_SIZE
+) {
+  boardBuffer.noFill();
+  boardBuffer.stroke(lineColor);
+  boardBuffer.strokeWeight(lineWeight);
+  boardBuffer.textFont(FONT);
+  boardBuffer.textSize(fontSize);
+  boardBuffer.textAlign(CENTER, CENTER);
   if (fillColor) {
-    fill(fillColor);
+    boardBuffer.fill(fillColor);
   } else {
-    noFill();
+    boardBuffer.noFill();
   }
-  text(string, pos.x + FONT_SIZE / 4, pos.y + FONT_SIZE / 4);
-  noFill();
+  boardBuffer.text(string, pos.x + FONT_SIZE / 4, pos.y + FONT_SIZE / 4);
+  boardBuffer.noFill();
 }
 
 function blockColor(block) {
@@ -94,10 +104,22 @@ function draw_selection(selection) {
   draw_rect(selection.block.rect, selectionColor, 2);
 }
 
+function draw_players(game) {
+  let me = game.players[client.socket.id];
+  let other = game.getOtherPlayer(me);
+  console.log(me);
+  fill(my_turn ? GREEN : DARK_GREEN);
+  rect(50, 100, 80, 80);
+  fill(WHITE);
+  fill(my_turn ? DARK_PURPLE : PURPLE);
+  rect(50, 580, 80, 80);
+}
+
 function draw_game(game) {
-  clear();
+  boardBuffer.clear();
   draw_board(game.board);
   if (game.selection) {
     draw_selection(game.selection);
   }
+  draw_players(game);
 }
