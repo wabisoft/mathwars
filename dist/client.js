@@ -25,8 +25,11 @@ function preload() {
 
 // Draw is the hook for p5's event loop
 function draw() {
-  draw_game(client.game);
-  image(boardBuffer, 100, 100);
+  if (client.game) {
+    draw_game(client.game);
+    image(boardBuffer, 100, 100);
+  }
+  console.log(client.game);
 }
 
 // mousePressed is the hook for p5's mouse press event callback

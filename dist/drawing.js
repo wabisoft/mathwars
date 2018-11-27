@@ -12,6 +12,10 @@ const BLOCK_CENTER = MathWars.BLOCK_CENTER;
 const BOARD_ROWS = MathWars.BOARD_ROWS;
 const BOARD_COLUMNS = MathWars.BOARD_COLUMNS;
 const FONT_SIZE = 30;
+const MIDDLE = {
+  x: (BOARD_ROWS * BLOCK_SIZE) / 2,
+  y: (BOARD_COLUMNS * BLOCK_SIZE) / 2
+};
 const Color = new Map([[1, WHITE], [-1, BLACK], [0, GREY]]);
 Object.freeze(Color);
 var boardBuffer;
@@ -109,17 +113,39 @@ function draw_players(game) {
   let other = game.getOtherPlayer(me);
   console.log(me);
   fill(my_turn ? GREEN : DARK_GREEN);
-  rect(50, 100, 80, 80);
-  fill(WHITE);
+  elipse(100, 40, 80, 80);
   fill(my_turn ? DARK_PURPLE : PURPLE);
   rect(50, 580, 80, 80);
 }
 
 function draw_game(game) {
   boardBuffer.clear();
+  if (game.over) {
+    draw_game_over(game.reason);
+    return;
+  }
+  if (!game.started) {
+    draw_string(
+      "Waiting for other players...",
+      MIDDLE,
+      WHITE,
+      2,
+      BLACK,
+      FONT_SIZE
+    );
+    return;
+  }
   draw_board(game.board);
   if (game.selection) {
     draw_selection(game.selection);
   }
   draw_players(game);
+}
+
+function draw_game_over(reason) {
+  let middle = clone(MIDDLE);
+  BIG_FONT = FONT_SIZE + 20;
+  draw_string("Game Over", middle, RED, 3, RED, BIG_FONT);
+  middle.y += BIG_FONT;
+  draw_string(reason, middle, RED, 3, RED, FONT_SIZE);
 }

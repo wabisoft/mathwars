@@ -180,11 +180,21 @@
           let block = this.board.getBlockAtIndex(blockData.index);
           this.selection = new Selection(block);
         }
+        this.over = gameData.over;
+        this.reason = gameData.reason;
+        this.started = gameData.started;
       } else {
         this.board = new Board();
         this.players = {};
         this.selection = null;
+        this.over = false;
+        this.reason = "";
+        this.started = false;
       }
+    }
+
+    get playerIds() {
+      return Object.keys(this.players);
     }
 
     registerPlayer(playerId) {
@@ -192,29 +202,32 @@
         return false;
       }
       this.players[playerId] = new Player(playerId);
-      let playerKeys = Object.keys(this.players);
-      if (playerKeys.length >= 2) {
-        // Thanks SO
-        // https://stackoverflow.com/a/15106541
-        let player = this.players[
-          playerKeys[(playerKeys.length * Math.random()) << 0]
-        ];
-        player.canMove = true;
-        console.log("It's " + player.id + " 's turn");
+      console.log(playerId + " joined the game!");
+      if (this.playerIds.length >= 2) {
+        this.start();
       }
-      console.log(playerId + " connected!");
       return true;
     }
 
     unregisterPlayer(playerId) {
       delete this.players[playerId];
-      console.log(playerId + " disconnected!");
+      console.log(playerId + " left the game!");
+      if (this.started) {
+        this.over = true;
+        this.reason = playerId + " left the game!";
+      }
     }
 
     start() {
-      startPlayer = this.players.values()[0];
-      startPlayer.canMove = True;
-      this.playersList[0].canMove = true;
+      let player = this.players[
+        // Thanks SO
+        // https://stackoverflow.com/a/15106541
+        this.playerIds[(this.playerIds.length * Math.random()) << 0]
+      ];
+      this.started = true;
+      player.canMove = true;
+      console.log("It's " + player.id + " 's turn");
+      console.log("The game has started!");
     }
 
     preload() {}

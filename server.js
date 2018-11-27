@@ -11,6 +11,11 @@ app.use(STATIC);
 
 server.listen(3000, "0.0.0.0");
 
+class Server {
+  constructor() {
+    this.game = new Game();
+  }
+}
 var game = new Game();
 io.on("connection", registerSocket);
 
