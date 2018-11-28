@@ -213,8 +213,8 @@
       delete this.players[playerId];
       console.log(playerId + " left the game!");
       if (this.started) {
-        this.over = true;
-        this.reason = playerId + " left the game!";
+        // this.over = true;
+        // this.reason = playerId + " left the game!";
       }
     }
 

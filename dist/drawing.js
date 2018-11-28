@@ -113,12 +113,16 @@ function draw_players(game) {
   let other = game.getOtherPlayer(me);
   console.log(me);
   fill(my_turn ? GREEN : DARK_GREEN);
-  elipse(100, 40, 80, 80);
-  fill(my_turn ? DARK_PURPLE : PURPLE);
-  rect(50, 580, 80, 80);
+  ellipse(100, 40, 80, 80);
+  let str = my_turn ? "It's your turn" : "It's " + other.id + " turn";
+  fill(WHITE);
+  textSize(FONT_SIZE);
+  text(str, 200, 40);
+  noFill();
 }
 
 function draw_game(game) {
+  clear();
   boardBuffer.clear();
   if (game.over) {
     draw_game_over(game.reason);
@@ -143,7 +147,7 @@ function draw_game(game) {
 }
 
 function draw_game_over(reason) {
-  let middle = clone(MIDDLE);
+  let middle = JSON.parse(JSON.stringify(MIDDLE));
   BIG_FONT = FONT_SIZE + 20;
   draw_string("Game Over", middle, RED, 3, RED, BIG_FONT);
   middle.y += BIG_FONT;
