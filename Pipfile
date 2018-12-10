@@ -8,6 +8,9 @@ pylint = "*"
 mypy = "*"
 
 [packages]
+flask = "*"
+uwsgi = "*"
+python-socketio = "*"
 
 [requires]
 python_version = "3.7"

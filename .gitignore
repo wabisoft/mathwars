@@ -1,1 +1,4 @@
 *.DS_Store
+node_modules/
+.mypy_cache/
+.vscode/

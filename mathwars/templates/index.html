@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title>MathWarz</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.7.1/pixi.min.js"></script>
+    <script src="{{ url_for('static', filename='js/test.js') }}"></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <!--
+      <div id="picnic">
+        <form action="#" onsubmit="client=new Client(validateForm(this));">
+          Who you is? <input type="text" name="nic" />
+          <input type="submit" value="GO" />
+        </form>
+      </div>
+    -->
+    <div id="sketch"></div>
+  </body>
+</html>
