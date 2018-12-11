@@ -5,15 +5,6 @@ from logging.config import dictConfig
 from .config import LOG_LEVEL
 
 
-def sign(num):
-    # this is gross
-    # bools can be implicitly cast to int so in this
-    # case True is 1 and False is 0
-    # and if num === 0 `and` gets cut off by short circuit and `0` gets returned
-    return num and (1, -1)[num < 0]
-    # if elif else is better probably
-
-
 def configure_logging(
     format: str = "[%(asctime)s] [%(levelname)-4s] <%(name)s>: %(message)s",
     datefmt: str = "%Y-%m-%dT%H:%M:%S",

@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import NamedTuple, Optional, List, Dict, MutableMapping, Any
 from collections import OrderedDict
 
-from .utils import sign, configure_logging, get_logger
+from ..utils import configure_logging, get_logger
 from .config import BOARD_ROWS, BOARD_COLUMNS
 
 
@@ -15,6 +15,15 @@ MOVE_VECTORS = [(0, 1), (1, 0), (-1, 0), (0, -1)]
 
 configure_logging()
 logger = get_logger(__name__)
+
+
+def sign(num):
+    # this is gross
+    # bools can be implicitly cast to int so in this
+    # case True is 1 and False is 0
+    # and if num === 0 `and` gets cut off by short circuit and `0` gets returned
+    return num and (1, -1)[num < 0]
+    # if elif else is better probably
 
 
 class Pos(NamedTuple):
