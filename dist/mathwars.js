@@ -1,5 +1,5 @@
 (function(exports) {
-  const SERVER_HOST = "tomato.local";
+  const SERVER_HOST = "wabisoft.io";
   const SERVER_PORT = "3000";
   const MAX_VALUE = 20;
   const BOARD_ROWS = 7;
